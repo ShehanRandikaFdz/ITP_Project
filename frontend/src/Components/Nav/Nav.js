@@ -30,8 +30,8 @@ const Nav = () => {
   }
 
   const menuItems = [
-    { path: "/dashboard", icon: "📊", label: "Dashboard" },
-    { path: "/", icon: "👨‍🎓", label: "Students" },
+    { path: "/", icon: "📊", label: "Dashboard" },
+    { path: "/student", icon: "👨‍🎓", label: "Students" },
     { path: "/staff", icon: "👨‍🏫", label: "Staff" },
     { path: "/inventory", icon: "📦", label: "Inventory" },
     { path: "/payments", icon: "💰", label: "Payments" },
@@ -52,7 +52,7 @@ const Nav = () => {
         <div className="sidebar-logo">
           <img src="/MKVLogo.jpg" alt="MKV Logo" style={{ width: "40px", height: "40px" }} />
         </div>
-        <h1 className="sidebar-title">MKV</h1>
+        <h1 className="sidebar-title">Munidasa Kumarathunga Vidayalaya</h1>
       </div>
 
         <div className="sidebar-content">
@@ -70,16 +70,6 @@ const Nav = () => {
               </li>
             ))}
           </ul>
-        </div>
-
-        <div className="sidebar-footer">
-          <div className="sidebar-user">
-            <div className="sidebar-user-avatar">A</div>
-            <div className="sidebar-user-info">
-              <p className="sidebar-user-name">Admin User</p>
-              <p className="sidebar-user-email">admin@school.edu</p>
-            </div>
-          </div>
         </div>
       </div>
 
