@@ -30,8 +30,8 @@ const Nav = () => {
   }
 
   const menuItems = [
-    { path: "/", icon: "📊", label: "Dashboard" },
-    { path: "/student", icon: "👨‍🎓", label: "Students" },
+    { path: "/dashboard", icon: "📊", label: "Dashboard" },
+    { path: "/", icon: "👨‍🎓", label: "Students" },
     { path: "/staff", icon: "👨‍🏫", label: "Staff" },
     { path: "/inventory", icon: "📦", label: "Inventory" },
     { path: "/payments", icon: "💰", label: "Payments" },

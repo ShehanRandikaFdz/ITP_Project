@@ -55,10 +55,10 @@ function App() {
           <main className="p-4">
             <Routes>
               {/* Dashboard Route */}
-              <Route path="/" element={<Dashboard />} />
+              <Route path="/dashboard" element={<Dashboard />} />
 
               {/* Student Management Routes */}
-              <Route path="/student" element={<StudentManagement />} />
+              <Route path="/" element={<StudentManagement />} />
               <Route path="/student-enrollment" element={<StudentEnrollment />} />
               <Route path="/student-profiles" element={<StudentList />} />
               <Route path="/student-profiles/:studentId" element={<StudentProfile />} />
