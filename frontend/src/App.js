@@ -1,6 +1,6 @@
 "use client"
 
-import { Routes, Route } from "react-router-dom"
+import { Routes, Route, Navigate } from "react-router-dom"
 import { ToastProvider, useToast } from "./hooks/use-toast"
 import ToastContainer from "./Components/ui/ToastContainer"
 
@@ -25,6 +25,19 @@ import EditItem from "./pages/EditItem"
 import ItemDetails from "./pages/ItemDetails"
 import StockReport from "./Components/StockReport"
 
+// Staff Management Pages
+import StaffManagement from "./Components/StaffManagement/StaffManagement"
+import StaffLogin from "./Components/StaffManagement/StaffLogin"
+import StaffEnrollment from "./Components/StaffManagement/StaffEnrollment/StaffEnrollment"
+import StaffProfile from "./Components/StaffManagement/StaffProfile/StaffProfile"
+import AdminLeaveManagement from "./Components/StaffManagement/LeaveManagement/AdminLeaveManagement"
+import StaffLeaveManagement from "./Components/StaffManagement/LeaveManagement/StaffLeaveManagement"
+import StaffAttendance from "./Components/StaffManagement/Attendance/StaffAttendance"
+import AdminAttendance from "./Components/StaffManagement/Attendance/AdminAttendance"
+import AdminDashboard from "./Components/StaffManagement/AdminDashboard"
+import StaffDashboard from "./Components/StaffManagement/StaffDashboard"
+import StaffProfiles from "./Components/Staff/StaffProfiles"
+
 // Event Management Pages
 import CalendarPage from "./Components/EventManagement/Calendar"
 import AddEventForm from './Components/EventManagement/AddEventForm';
@@ -45,7 +58,21 @@ const ToastWrapper = () => {
   const { toasts, dismiss } = useToast()
   return <ToastContainer toasts={toasts} onClose={dismiss} />
 }
+// Protected Route component
+const ProtectedRoute = ({ children, allowedRoles }) => {
+  const staffRole = localStorage.getItem('staffRole');
+  const staffToken = localStorage.getItem('staffToken');
 
+  if (!staffToken) {
+    return <Navigate to="/staff/login" replace />;
+  }
+
+  if (allowedRoles && !allowedRoles.includes(staffRole)) {
+    return <Navigate to="/staff/login" replace />;
+  }
+
+  return children;
+};
 function App() {
   return (
     <ToastProvider>
@@ -55,10 +82,10 @@ function App() {
           <main className="p-4">
             <Routes>
               {/* Dashboard Route */}
-              <Route path="/" element={<Dashboard />} />
+              <Route path="/dashboard" element={<Dashboard />} />
 
               {/* Student Management Routes */}
-              <Route path="/student" element={<StudentManagement />} />
+              <Route path="/" element={<StudentManagement />} />
               <Route path="/student-enrollment" element={<StudentEnrollment />} />
               <Route path="/student-profiles" element={<StudentList />} />
               <Route path="/student-profiles/:studentId" element={<StudentProfile />} />
@@ -83,7 +110,67 @@ function App() {
               <Route path="/event-requests" element={<EventRequests />} />
               <Route path="/edit-event/:id" element={<EditEventForm />} />
 
+                {/* Staff Management Routes */}
+                <Route path="/staff" element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <StaffProfiles />
+                </ProtectedRoute>
+              } />
+              <Route path="/staff/login" element={<StaffLogin />} />
+              
+              {/* Protected Admin Routes */}
+              <Route path="/staff/admin" element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/staff/enrollment" element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <StaffEnrollment />
+                </ProtectedRoute>
+              } />
+              <Route path="/staff/profiles" element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <StaffProfiles />
+                </ProtectedRoute>
+              } />
+              <Route path="/staff/admin/leave" element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminLeaveManagement />
+                </ProtectedRoute>
+              } />
+              <Route path="/staff/admin/attendance" element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminAttendance />
+                </ProtectedRoute>
+              } />
 
+              {/* Protected Staff User Routes */}
+              <Route path="/staff/user" element={
+                <ProtectedRoute allowedRoles={['staff']}>
+                  <StaffDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/staff/user/:id" element={
+                <ProtectedRoute allowedRoles={['staff']}>
+                  <StaffDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/staff/user/account" element={
+                <ProtectedRoute allowedRoles={['staff']}>
+                  <StaffProfile />
+                </ProtectedRoute>
+              } />
+              <Route path="/staff/user/leave" element={
+                <ProtectedRoute allowedRoles={['staff']}>
+                  <StaffLeaveManagement />
+                </ProtectedRoute>
+              } />
+              <Route path="/staff/user/attendance" element={
+                <ProtectedRoute allowedRoles={['staff']}>
+                  <StaffAttendance />
+                </ProtectedRoute>
+              } />
             </Routes>
           </main>
         </div>
