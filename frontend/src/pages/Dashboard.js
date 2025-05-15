@@ -1,7 +1,87 @@
-import { Users, UserPlus, Briefcase, DollarSign, Calendar, AlertCircle, FileText } from "lucide-react"
+import { Users, UserPlus, Briefcase, DollarSign, AlertCircle, FileText } from "lucide-react"
+import { useState, useEffect } from "react"
+import { getAllStudents } from "../services/studentService"
+import { inventoryApi } from "../services/api"
+import LoadingSpinner from "../Components/common/LoadingSpinner"
+import ErrorMessage from "../Components/common/ErrorMessage"
 import "../styles/dashboard.css"
 
 const Dashboard = () => {
+  const [stats, setStats] = useState({
+    totalStudents: 0,
+    totalStaff: 0,
+    totalAssets: 0,
+    totalFund: 0,
+    recentActivities: [],
+    alerts: []
+  })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        // Fetch total students
+        const studentsResponse = await getAllStudents()
+        const totalStudents = studentsResponse.length
+
+        // Calculate total staff (assuming staff data is available in students response)
+        const totalStaff = studentsResponse.filter(student => student.role === 'staff').length
+
+        // Fetch total assets from inventory
+        const inventoryResponse = await inventoryApi.getAllItems()
+        const totalAssets = inventoryResponse.data.length
+
+        // Sample data for activities and alerts
+        const recentActivities = [
+          {
+            type: 'registration',
+            title: 'New student registration completed',
+            time: new Date().toLocaleString()
+          },
+          {
+            type: 'payment',
+            title: 'Fee payment received',
+            time: new Date(Date.now() - 3600000).toLocaleString() // 1 hour ago
+          }
+        ]
+
+        const alerts = [
+          {
+            type: 'payment',
+            content: 'Fee payment pending for 5 students'
+          },
+          {
+            type: 'maintenance',
+            content: '3 assets require maintenance'
+          }
+        ]
+
+        // TODO: Replace with actual API call for fund data
+        // For now, we'll use placeholder value
+        const totalFund = 0 // Replace with actual API call
+
+        setStats({
+          totalStudents,
+          totalStaff,
+          totalAssets,
+          totalFund,
+          recentActivities,
+          alerts
+        })
+        setLoading(false)
+      } catch (err) {
+        setError('Failed to fetch dashboard data')
+        setLoading(false)
+      }
+    }
+
+    fetchDashboardData()
+  }, [])
+
+  if (loading) return <LoadingSpinner />
+  if (error) return <ErrorMessage message={error} />
+
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
@@ -69,8 +149,8 @@ const Dashboard = () => {
               <Users size={20} />
             </div>
           </div>
-          <div className="stat-value">2,543</div>
-          <div className="stat-change positive">+12% from last month</div>
+          <div className="stat-value">{stats.totalStudents}</div>
+          <div className="stat-change">Active students</div>
         </div>
 
         <div className="stat-card">
@@ -80,8 +160,8 @@ const Dashboard = () => {
               <Briefcase size={20} />
             </div>
           </div>
-          <div className="stat-value">128</div>
-          <div className="stat-change">+3 new this month</div>
+          <div className="stat-value">{stats.totalStaff}</div>
+          <div className="stat-change">Active staff members</div>
         </div>
 
         <div className="stat-card">
@@ -91,8 +171,8 @@ const Dashboard = () => {
               <FileText size={20} />
             </div>
           </div>
-          <div className="stat-value">1,890</div>
-          <div className="stat-change">95% in good condition</div>
+          <div className="stat-value">{stats.totalAssets}</div>
+          <div className="stat-change">School assets</div>
         </div>
 
         <div className="stat-card">
@@ -102,8 +182,8 @@ const Dashboard = () => {
               <DollarSign size={20} />
             </div>
           </div>
-          <div className="stat-value">$847,245</div>
-          <div className="stat-change positive">+8.5% this quarter</div>
+          <div className="stat-value">${stats.totalFund.toLocaleString()}</div>
+          <div className="stat-change">Available funds</div>
         </div>
       </div>
 
@@ -113,35 +193,24 @@ const Dashboard = () => {
         <div className="content-card">
           <h2 className="content-header">Recent Activities</h2>
           <div className="activity-list">
-            <div className="activity-item">
-              <div className="activity-icon">
-                <UserPlus size={20} />
+            {stats.recentActivities.map((activity, index) => (
+              <div key={index} className="activity-item">
+                <div className="activity-icon">
+                  <UserPlus size={20} />
+                </div>
+                <div className="activity-content">
+                  <div className="activity-title">{activity.title}</div>
+                  <div className="activity-time">{activity.time}</div>
+                </div>
               </div>
-              <div className="activity-content">
-                <div className="activity-title">New student registration completed</div>
-                <div className="activity-time">2 hours ago</div>
+            ))}
+            {stats.recentActivities.length === 0 && (
+              <div className="activity-item">
+                <div className="activity-content">
+                  <div className="activity-title">No recent activities</div>
+                </div>
               </div>
-            </div>
-
-            <div className="activity-item">
-              <div className="activity-icon">
-                <DollarSign size={20} />
-              </div>
-              <div className="activity-content">
-                <div className="activity-title">Fee payment received</div>
-                <div className="activity-time">5 hours ago</div>
-              </div>
-            </div>
-
-            <div className="activity-item">
-              <div className="activity-icon">
-                <Calendar size={20} />
-              </div>
-              <div className="activity-content">
-                <div className="activity-title">Staff meeting scheduled</div>
-                <div className="activity-time">Yesterday at 15:00</div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -149,26 +218,19 @@ const Dashboard = () => {
         <div className="content-card">
           <h2 className="content-header">Alerts</h2>
           <div className="alert-list">
-            <div className="alert-item">
-              <div className="alert-icon">
-                <AlertCircle size={16} />
+            {stats.alerts.map((alert, index) => (
+              <div key={index} className="alert-item">
+                <div className="alert-icon">
+                  <AlertCircle size={16} />
+                </div>
+                <div className="alert-content">{alert.content}</div>
               </div>
-              <div className="alert-content">Fee payment pending for 15 students</div>
-            </div>
-
-            <div className="alert-item">
-              <div className="alert-icon">
-                <AlertCircle size={16} />
+            ))}
+            {stats.alerts.length === 0 && (
+              <div className="alert-item">
+                <div className="alert-content">No alerts at this time</div>
               </div>
-              <div className="alert-content">5 assets require maintenance</div>
-            </div>
-
-            <div className="alert-item">
-              <div className="alert-icon">
-                <AlertCircle size={16} />
-              </div>
-              <div className="alert-content">Staff evaluation due next week</div>
-            </div>
+            )}
           </div>
         </div>
       </div>
